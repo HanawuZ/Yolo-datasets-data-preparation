@@ -29,6 +29,14 @@ def datasets_rename(src,name="example"):
         # Rename images file
         os.rename(img_src, rename_img_dst)
 
+    for count, filename in enumerate(os.listdir(labels_path)):
+        label_dst = f"{name}_{str(count)}.txt"
+        label_src = f"{labels_path}/{filename}"
+        rename_label_dst = f"{labels_path}/{label_dst}"
+
+        # Rename images file
+        os.rename(label_src, rename_label_dst)
+
 
 while True:
     datasets_name = input("Enter datasets directory's name: ")
