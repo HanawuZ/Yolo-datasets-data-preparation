@@ -1,0 +1,7 @@
+train:
+val:
+test:
+
+nc : 6
+
+names: [ 'bus', 'car', 'truck', 'motorcycle', 'person', 'crosswalk' ]
