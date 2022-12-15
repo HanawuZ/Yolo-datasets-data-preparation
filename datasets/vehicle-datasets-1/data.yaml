@@ -1,7 +1,0 @@
-train:
-val:
-test:
-
-nc : 6
-
-names: [ 'bus', 'car', 'motorcycle', 'truck', 'person', 'crosswalk' ]
