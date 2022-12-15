@@ -38,10 +38,14 @@ def datasets_rename(src,name="example"):
         os.rename(label_src, rename_label_dst)
 
 
-while True:
-    datasets_name = input("Enter datasets directory's name: ")
-    if datasets_name not in os.listdir(path_datasets):
-        print(f"There is no directory name {datasets_name} in {root}")
-    else :
-        datasets_rename(path_datasets/datasets_name)
-        break
+# while True:
+#     datasets_name = input("Enter datasets directory's name: ")
+#     if datasets_name not in os.listdir(path_datasets):
+#         print(f"There is no directory name {datasets_name} in {root}")
+#     else :
+#         datasets_rename(path_datasets/datasets_name)
+#         break
+
+# source = os.path.join(root,"datasets","vehicle-datasets","person-7")
+# file_name = input("Enter image and label name: ")
+# datasets_rename(os.path.join(source,"train"), file_name)
