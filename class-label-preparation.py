@@ -12,40 +12,107 @@ Class label indexes
     4 : person
     5 : crosswalk
 """
-# Define data.yaml path
-data_yaml_path = pathlib.Path(__file__).parent / "datasets"/"vehicle-datasets"/"data.yaml"
+# Define root path
+# It should be ..\Datasets-data-preparation\
+ROOT = pathlib.Path(__file__).parent
+
+# Define targeted data.yaml path.
+# This yaml define targeted data classes label.
+DATA_YAML_PATH = os.path.join(ROOT, "data")
+
+# Define dataset directory path
+DATASETS_PATH = os.path.join(ROOT, "datasets")
 
 # Define list of data classes
 data_classes = []
 
 # Read data classes yaml file and get list of classes names.
-with open(data_yaml_path, 'r') as data:
+with open(os.path.join(DATA_YAML_PATH, "pedestrian_data.yaml"), "r") as data:
     data_dict = yaml.safe_load(data) 
     data_classes = data_dict["names"]
 
-def fix_modify_labels(file):
-    # Read label text file as readable mode.
+def modify_label_ignore_value(file,ignore_label):
+
+    # Open current label text file as readable mode.
     raw_label_txt = open(file, "r")
+
+    # Read label text file and split into list
+    # The list structure should be ['0 0.322234 0.1234 0.7556 0.32343', '0 0.43533 0.111 0.35759 0.567785', ...]
     label_list = raw_label_txt.read().split("\n")
     
     # Excluding empty string('') from labels_list
     label_list = [label for label in label_list if label != '']
     prepared_label_list = []
+
+    # Iterate through label list for label modification.
     for label in label_list:
 
         # ? The split_label must be something like 
         # ? ['0', '0.5453335', '0.134654', '0.663211', '0.111111']
         split_label = label.split(" ")
-        split_label[0] = "4"
-        prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
+
+        # Assign label value
+        if split_label[0] == ignore_label:
+            continue
+        else :
+            split_label[0] = "4"
+
+            # Append new label into prepared label list
+            prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
     
+    # Close raw label text file
     raw_label_txt.close()
 
-    # Open current text file as write mode then write new annotate point to this text file.
-    with open(file,'w') as prepared_file:
+    # Open current text file as write mode then write new label to this text file.
+    with open(file,"w") as prepared_file:
         for prepared_label in prepared_label_list:
+
+            # Write new label text without line break if current prepare label is last element of prepared label list.
             if prepared_label == prepared_label_list[-1]:
                 prepared_file.write(f"{prepared_label}")
+
+            # Write new label text
+            else :
+                prepared_file.write(f"{prepared_label}\n")
+
+def fix_class_modify_labels(file):
+
+    # Open current label text file as readable mode.
+    raw_label_txt = open(file, "r")
+
+    # Read label text file and split into list
+    # The list structure should be ['0 0.322234 0.1234 0.7556 0.32343', '0 0.43533 0.111 0.35759 0.567785', ...]
+    label_list = raw_label_txt.read().split("\n")
+    
+    # Excluding empty string('') from labels_list
+    label_list = [label for label in label_list if label != '']
+    prepared_label_list = []
+
+    # Iterate through label list for label modification.
+    for label in label_list:
+
+        # ? The split_label must be something like 
+        # ? ['0', '0.5453335', '0.134654', '0.663211', '0.111111']
+        split_label = label.split(" ")
+
+        # Assign label value
+        split_label[0] = "5"
+
+        # Append new label into prepared label list
+        prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
+    
+    # Close raw label text file
+    raw_label_txt.close()
+
+    # Open current text file as write mode then write new label to this text file.
+    with open(file,"w") as prepared_file:
+        for prepared_label in prepared_label_list:
+
+            # Write new label text without line break if current prepare label is last element of prepared label list.
+            if prepared_label == prepared_label_list[-1]:
+                prepared_file.write(f"{prepared_label}")
+
+            # Write new label text
             else :
                 prepared_file.write(f"{prepared_label}\n")
 
@@ -92,41 +159,51 @@ def modify_labels(file, raw_classes):
             else :
                 prepared_file.write(f"{prepared_label}\n")
 
-                
-def class_label_data_preparation(raw_data_label_path, raw_data_yaml_path):
-    """ Parameters:
-        - raw_data_label_path => Unprepared datasets label directory path.
-        - raw_data_yaml_path => Path of raw datasets yaml file
+
+
+def class_label_data_preparation(raw_data_label_path):
+    """ ### Parameters
+        - raw_data_label_path ==> Unprepared datasets label directory path.
     """
 
-    raw_data_classes = []
+    # raw_data_classes = []
 
-    with open(raw_data_yaml_path, 'r') as raw_data_ymal:
+    # with open(raw_data_yaml_path, "r") as raw_data_ymal:
         
-        # Read raw data label yaml file
-        raw_yaml = yaml.safe_load(raw_data_ymal)
-        raw_data_classes = [cls.lower() for cls in raw_yaml["names"]]
-    # print(raw_data_classes)
+    #     # Read raw data label yaml file
+    #     raw_yaml = yaml.safe_load(raw_data_ymal)
 
-    # Change directory to raw data labels dir path.
-    os.chdir(raw_data_label_path)
+    #     # Get names of class and convert name into lower case form.
+    #     raw_data_classes = [cls.lower() for cls in raw_yaml["names"]]
     
-    # iterate through all labels file in label folder.
-    for file in os.listdir():
+    try:
+        # Change current directory to raw data labels dir path.
+        os.chdir(raw_data_label_path)
+        
+        # Iterate through all labels files in label folder.
+        # Labels file should be something like 'name.txt', '3ewfwefw343--erwefwe.txt'
+        for file in os.listdir():
 
-        # Check whether file is in text format or not.
-        if file.endswith(".txt"):
-            file_path = f"{raw_data_label_path}\{file}"
-    
-            # call modify label file function.
-            # modify_labels(file_path, raw_data_classes)
+            # Check whether file is in text format or not.
+            if file.endswith(".txt"):
+                file_path = f"{raw_data_label_path}\{file}"
 
-            fix_modify_labels(file_path)
-# Define motocycle data yaml file path and label directory path.
-# selected_data_yaml_path = r'C:\Users\asus\Desktop\PYTHON\Object-Detection-New\data-preparation\datasets\Motorcycle-datasets-1\data.yaml'
-# selected_label_path = r'C:\Users\asus\Desktop\PYTHON\Object-Detection-New\data-preparation\datasets\Motorcycle-datasets-1\train\labels'
+                fix_class_modify_labels(file_path)
 
-selected_data_yaml_path = data_yaml_path.parent/"person-7"/"data.yaml"
-selected_label_dir_path = data_yaml_path.parent/"person-7"/"valid"/"labels"
-class_label_data_preparation(selected_label_dir_path, selected_data_yaml_path)
+                # modify_label_ignore_value(file_path,"1")
 
+    except FileNotFoundError:
+        return
+
+if __name__ == "__main__":
+
+    #
+    # Path shoulde be ../Datasets-data-preparation/datasets/<dataset_name>/
+    targeted_dataset_path = os.path.join(DATASETS_PATH, "Crosswalk")
+
+    sub_dataset_dir_path = os.path.join(targeted_dataset_path, "crosswalk-dataset-3")
+
+    for folder_name in ["train", "valid", "test"]:
+
+        class_label_data_preparation(raw_data_label_path=os.path.join(sub_dataset_dir_path, folder_name, "labels"))
+#//----------------------------------------------------------------------------------------------
