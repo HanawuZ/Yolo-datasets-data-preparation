@@ -49,14 +49,16 @@ def datasets_rename(src,name="example"):
             os.rename(img_src, rename_img_dst)
             os.rename(label_src, rename_label_dst)
 
-            clean_file_count+=1
+            if (os.path.exists(rename_img_dst)):
+                clean_file_count+=1
+                
         except (FileNotFoundError):
             error_file_count+=1
             continue
 
         except (FileExistsError):
             continue
-        
+
     print("Completed!!!")
     print(f"Amount of clean file : {clean_file_count}")
     print(f"Amount of error file : {error_file_count}\n")
@@ -64,14 +66,20 @@ def datasets_rename(src,name="example"):
 # Declare target dataset path.
 target_dataset_path = os.path.join(DATASETS_PATH,"Vehicles")
 
-sub_dataset_path = os.path.join(target_dataset_path,"motorcycle-dataset-2")
+# Get sub-dataset directory path.
+sub_dataset_path = os.path.join(target_dataset_path,"vehicle-dataset-3")
 
+# Get sub-dataset directory name.
 sub_dataset_name = os.path.basename(sub_dataset_path)
+
 for folder_name in ["train", "valid", "test"]:
+
+    # Rename image and label name. If there's no either `train`, `test` or `valid` then continue to next folder.
     try:
         datasets_rename(src=os.path.join(sub_dataset_path, folder_name), name=f"{sub_dataset_name}_{folder_name}")
     except(FileNotFoundError):
         continue
+
 # Test with test_samples folder
 # datasets_rename(src="datasets\\test_samples", name=f"test-samples")
 
