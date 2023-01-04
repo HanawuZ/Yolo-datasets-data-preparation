@@ -11,6 +11,7 @@ Class label indexes
     3 : truck
     4 : person
     5 : crosswalk
+    6 : cyclist
 """
 # Define root path
 # It should be ..\Datasets-data-preparation\
@@ -27,10 +28,31 @@ DATASETS_PATH = os.path.join(ROOT, "datasets")
 data_classes = []
 
 # Read data classes yaml file and get list of classes names.
-with open(os.path.join(DATA_YAML_PATH, "pedestrian_data.yaml"), "r") as data:
+with open(os.path.join(DATA_YAML_PATH, "traffic_data.yaml"), "r") as data:
     data_dict = yaml.safe_load(data) 
     data_classes = data_dict["names"]
 
+def read_labels(file):
+     # Read label text file as readable mode.
+    raw_label_txt = open(file, "r")
+
+    # Create label list
+    # ? Result of labels list must be something like
+    # ? ['0 0.343435 0.455112 0.464223 0.54', '0 0.1234 0.45344 0.86532 0.136897', ... , '']
+    label_list = raw_label_txt.read().split("\n")
+
+    # Excluding empty string('') from labels_list
+    label_list = [label for label in label_list if label != '']
+
+    # Iterate through all label for modifying class label index
+    for label in label_list:
+
+        # ? The split_label must be something like 
+        # ? ['0', '0.5453335', '0.134654', '0.663211', '0.111111']
+        split_label = label.split(" ")
+        print(split_label)
+
+# //-------------------------------------------------------------------------------------------------------
 def modify_labels(file, raw_classes):
     # Read label text file as readable mode.
     raw_label_txt = open(file, "r")
@@ -47,6 +69,11 @@ def modify_labels(file, raw_classes):
     prepared_label_list = []
 
     # Iterate through all label for modifying class label index
+    # Iterate through this list
+    # ? [   '0 0.343435 0.455112 0.464223 0.54', 
+    # ?     '0 0.1234 0.45344 0.86532 0.136897',
+    # ?     '1 0.54456 0.9545 0.86532 0.136897',
+    # ?     ......................................  ]
     for label in label_list:
 
         # ? The split_label must be something like 
@@ -89,7 +116,7 @@ def class_label_data_preparation(raw_data_label_path, raw_data_yaml_path):
 
         # Get names of class and convert name into lower case form.
         raw_data_classes = [cls.lower() for cls in raw_yaml["names"]]
-     
+    print(raw_data_classes)
     try:
         # Change current directory to raw data labels dir path.
         os.chdir(raw_data_label_path)
@@ -102,17 +129,18 @@ def class_label_data_preparation(raw_data_label_path, raw_data_yaml_path):
             if file.endswith(".txt"):
                 file_path = f"{raw_data_label_path}\{file}"
 
-                modify_labels(file_path, raw_data_classes)
+                read_labels(file_path)
+                # modify_labels(file_path, raw_data_classes)
 
     except FileNotFoundError:
         return
 
 if __name__ == "__main__":
     # Path should be ../Datasets-data-preparation/datasets/<dataset_name>/
-    targeted_dataset_path = os.path.join(DATASETS_PATH, "Vehicles")
+    targeted_dataset_path = os.path.join(DATASETS_PATH)
 
     # Path should be ../Datasets-data-preparation/datasets/<dataset_name>/<sub-dataset-dir>/...
-    sub_dataset_dir_path = os.path.join(targeted_dataset_path, "vehicle-dataset-3")
+    sub_dataset_dir_path = os.path.join(targeted_dataset_path, "unprepared", "traffic-night-dataset")
 
     # Get unprepared data.yaml path.
     sub_dataset_yaml_path = os.path.join(sub_dataset_dir_path,"data.yaml")

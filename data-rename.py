@@ -63,11 +63,9 @@ def datasets_rename(src,name="example"):
     print(f"Amount of clean file : {clean_file_count}")
     print(f"Amount of error file : {error_file_count}\n")
 
-# Declare target dataset path.
-target_dataset_path = os.path.join(DATASETS_PATH,"Vehicles")
 
 # Get sub-dataset directory path.
-sub_dataset_path = os.path.join(target_dataset_path,"vehicle-dataset-3")
+sub_dataset_path = os.path.join(DATASETS_PATH,"unprepared","traffic-day-dataset")
 
 # Get sub-dataset directory name.
 sub_dataset_name = os.path.basename(sub_dataset_path)
@@ -80,17 +78,3 @@ for folder_name in ["train", "valid", "test"]:
     except(FileNotFoundError):
         continue
 
-# Test with test_samples folder
-# datasets_rename(src="datasets\\test_samples", name=f"test-samples")
-
-# # Iterate through dataset directory if there're subdatasets.
-# for dataset_dir_name in os.listdir(target_dataset_path):
-    
-#     # Get path of current sub-dataset
-#     sub_dataset_path = os.path.join(target_dataset_path,dataset_dir_name)
-
-#     # Call function datasets_rename to rename all images and labels file name in either folder 'train', 'test' or 'valid'
-#     # new file names are depend on sub-dataset folder's name.
-#     # Ex. person-dataset-3, file name will be 'person-dataset-3_train.png', 'person-dataset-3_train.txt'
-#     for folder_name in ["train", "valid", "test"]:
-#         datasets_rename(src=os.path.join(sub_dataset_path, folder_name), name=f"{dataset_dir_name}_{folder_name}")
