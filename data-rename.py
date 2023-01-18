@@ -9,7 +9,7 @@ ROOT = pathlib.Path(__file__).parent
 DATASETS_PATH = os.path.join(ROOT,"datasets")
 
 
-def datasets_rename(src,name="example"):
+def datasets_rename(src,name,dir_name):
     """ Function for renaming all images and label files in directory by input name.
     ### Parameters
     - src : source of file directory.
@@ -59,22 +59,25 @@ def datasets_rename(src,name="example"):
         except (FileExistsError):
             continue
 
-    print("Completed!!!")
+    print(f"{dir_name} files rename completed!!!")
     print(f"Amount of clean file : {clean_file_count}")
     print(f"Amount of error file : {error_file_count}\n")
 
 
-# Get sub-dataset directory path.
-sub_dataset_path = os.path.join(DATASETS_PATH,"unprepared","traffic-day-dataset")
+if(__name__=="__main__"):
+    # Get sub-dataset directory path.
+    sub_dataset_path = os.path.join(DATASETS_PATH,"selected","traffic-dataset-2")
 
-# Get sub-dataset directory name.
-sub_dataset_name = os.path.basename(sub_dataset_path)
+    # Get sub-dataset directory name.
+    sub_dataset_name = os.path.basename(sub_dataset_path)
 
-for folder_name in ["train", "valid", "test"]:
+    for folder_name in ["train", "valid", "test", "export"]:
 
-    # Rename image and label name. If there's no either `train`, `test` or `valid` then continue to next folder.
-    try:
-        datasets_rename(src=os.path.join(sub_dataset_path, folder_name), name=f"{sub_dataset_name}_{folder_name}")
-    except(FileNotFoundError):
-        continue
+        # Rename image and label name. If there's no either `train`, `test` or `valid` then continue to next folder.
+        try:
+            datasets_rename(src=os.path.join(sub_dataset_path, folder_name), 
+                            name=f"{sub_dataset_name}_{folder_name}",
+                            dir_name=folder_name)
+        except(FileNotFoundError):
+            continue
 

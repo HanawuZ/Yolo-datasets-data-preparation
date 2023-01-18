@@ -32,7 +32,7 @@ with open(os.path.join(DATA_YAML_PATH, "traffic_data.yaml"), "r") as data:
     data_dict = yaml.safe_load(data) 
     data_classes = data_dict["names"]
 
-def read_labels(file):
+def read_labels(file, raw_classes):
      # Read label text file as readable mode.
     raw_label_txt = open(file, "r")
 
@@ -44,13 +44,30 @@ def read_labels(file):
     # Excluding empty string('') from labels_list
     label_list = [label for label in label_list if label != '']
 
-    # Iterate through all label for modifying class label index
+    prepared_label_list = []
+    # Iterate through all label for modifying class label index and ignore class label that not in our class label
     for label in label_list:
 
         # ? The split_label must be something like 
         # ? ['0', '0.5453335', '0.134654', '0.663211', '0.111111']
         split_label = label.split(" ")
-        print(split_label)
+        # Get target class index as integer. Ex. cls_i = 0
+        cls_i = int(split_label[0])
+        
+        cls = raw_classes[cls_i]
+
+        # * Change class label
+        # Iterate through data labels list : ['bus', 'car', 'motorcycle', 'truck', ....]
+        for i in range(len(data_classes)):
+            
+            # If current class is equal to targeted class then change class label.
+            if cls == data_classes[i]:
+                split_label[0] = str(i)
+                prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
+                break
+
+    print(f"Before = {label_list}\n\n")
+    print(f"After = {prepared_label_list}")
 
 # //-------------------------------------------------------------------------------------------------------
 def modify_labels(file, raw_classes):
@@ -90,17 +107,15 @@ def modify_labels(file, raw_classes):
             # If current class is equal to targeted class then change class label.
             if cls == data_classes[i]:
                 split_label[0] = str(i)
+                prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
+                break
 
-        prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
     raw_label_txt.close()
 
     # Open current text file as write mode then write new annotate point to this text file.
     with open(file,"w") as prepared_file:
         for prepared_label in prepared_label_list:
-            if prepared_label == prepared_label_list[-1]:
-                prepared_file.write(f"{prepared_label}")
-            else :
-                prepared_file.write(f"{prepared_label}\n")
+            prepared_file.write(f"{prepared_label}\n")
 
 def class_label_data_preparation(raw_data_label_path, raw_data_yaml_path):
     """ ### Parameters
@@ -129,23 +144,22 @@ def class_label_data_preparation(raw_data_label_path, raw_data_yaml_path):
             if file.endswith(".txt"):
                 file_path = f"{raw_data_label_path}\{file}"
 
-                read_labels(file_path)
-                # modify_labels(file_path, raw_data_classes)
+                # read_labels(file_path, raw_data_classes)
+                modify_labels(file_path, raw_data_classes)
 
     except FileNotFoundError:
         return
 
 if __name__ == "__main__":
-    # Path should be ../Datasets-data-preparation/datasets/<dataset_name>/
+    # Path should be ../Datasets-data-preparation/datasets/
     targeted_dataset_path = os.path.join(DATASETS_PATH)
 
-    # Path should be ../Datasets-data-preparation/datasets/<dataset_name>/<sub-dataset-dir>/...
-    sub_dataset_dir_path = os.path.join(targeted_dataset_path, "unprepared", "traffic-night-dataset")
+    sub_dataset_dir_path = os.path.join(targeted_dataset_path, "selected", "traffic-dataset-2")
 
     # Get unprepared data.yaml path.
     sub_dataset_yaml_path = os.path.join(sub_dataset_dir_path,"data.yaml")
 
-    for folder_name in ["train", "valid", "test"]:
+    for folder_name in ["train", "valid", "test", "export"]:
         try:
             # Path should be ../datasets/<dataset_name>/<sub-dataset-dir/train/labels/...
             label_path = os.path.join(sub_dataset_dir_path,folder_name,"labels")
