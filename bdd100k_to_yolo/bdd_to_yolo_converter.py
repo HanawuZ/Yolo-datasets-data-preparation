@@ -101,8 +101,8 @@ def main():
     print('start YOLO labels creation')
 
     # Start converting bdd100k labels format into YOLO format
-    generate_yolo_labels(json_path = PATHS["/bdd100k/valid/labels/bdd100k_labels_images_val.json"], 
-                         save_path = PATHS["/preprocessed_bdd100k/valid/labels"],
+    generate_yolo_labels(json_path = PATHS["/bdd100k/valid/labels/bdd100k_labels_images_train.json"], 
+                         save_path = PATHS["/preprocessed_bdd100k/train/labels"],
                          fname_prefix=None, fname_postfix=None)
 
 if __name__ == '__main__':
