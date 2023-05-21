@@ -1,6 +1,8 @@
 # Ignore datasets folder.
 /datasets/
 /data/
+bdd100k
+preprocessed_bdd100k
 
 # Ignore pycache folder
 __pycache__
