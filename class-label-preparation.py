@@ -1,34 +1,31 @@
 # Import Module
 import os
 import yaml
-import pathlib
+from path import path
+from tqdm import tqdm
 
 """
 Class label indexes
-    0 : bus
-    1 : car
-    2 : motorcycle
-    3 : truck
-    4 : person
-    5 : crosswalk
-    6 : cyclist
+    car : 0
+    bus : 1
+    person : 2
+    bike : 3
+    truck : 4
+    motorcycle : 5
+    train : 6
+    rider : 7
+    traffic sign 8
+    traffic light(red) : 9
+    traffic light(yellow) : 10
+    traffic light(green) : 11
+    cyclist : 12
 """
-# Define root path
-# It should be ..\Datasets-data-preparation\
-ROOT = pathlib.Path(__file__).parent
-
-# Define targeted data.yaml path.
-# This yaml define targeted data classes label.
-DATA_YAML_PATH = os.path.join(ROOT, "data")
-
-# Define dataset directory path
-DATASETS_PATH = os.path.join(ROOT, "datasets")
 
 # Define list of data classes
 data_classes = []
 
 # Read data classes yaml file and get list of classes names.
-with open(os.path.join(DATA_YAML_PATH, "traffic_data.yaml"), "r") as data:
+with open(path["/config/data.yml"], "r") as data:
     data_dict = yaml.safe_load(data) 
     data_classes = data_dict["names"]
 
@@ -76,7 +73,10 @@ def modify_labels(file, raw_classes):
 
     # Create label list
     # ? Result of labels list must be something like
-    # ? ['0 0.343435 0.455112 0.464223 0.54', '0 0.1234 0.45344 0.86532 0.136897', ... , '']
+    # ? [   '0 0.343435 0.455112 0.464223 0.54', 
+    # ?     '0 0.1234 0.45344 0.86532 0.136897',
+    # ?     '1 0.54456 0.9545 0.86532 0.136897',
+    # ?     ......................................
     label_list = raw_label_txt.read().split("\n")
     
     # Excluding empty string('') from labels_list
@@ -90,7 +90,7 @@ def modify_labels(file, raw_classes):
     # ? [   '0 0.343435 0.455112 0.464223 0.54', 
     # ?     '0 0.1234 0.45344 0.86532 0.136897',
     # ?     '1 0.54456 0.9545 0.86532 0.136897',
-    # ?     ......................................  ]
+    # ?     ....................................  ]
     for label in label_list:
 
         # ? The split_label must be something like 
@@ -119,7 +119,8 @@ def modify_labels(file, raw_classes):
 
 def class_label_data_preparation(raw_data_label_path, raw_data_yaml_path):
     """ ### Parameters
-        - raw_data_label_path ==> Unprepared datasets label directory path.
+        - raw_data_label_path   : Unprepared datasets label directory path.
+        - raw_data_yaml_path    : Unprepared data.yaml path.
     """
 
     raw_data_classes = []
@@ -131,41 +132,44 @@ def class_label_data_preparation(raw_data_label_path, raw_data_yaml_path):
 
         # Get names of class and convert name into lower case form.
         raw_data_classes = [cls.lower() for cls in raw_yaml["names"]]
-    print(raw_data_classes)
     try:
         # Change current directory to raw data labels dir path.
         os.chdir(raw_data_label_path)
         
         # Iterate through all labels files in label folder.
         # Labels file should be something like 'name.txt', '3ewfwefw343--erwefwe.txt'
-        for file in os.listdir():
+        for file in tqdm(os.listdir(), desc=raw_data_label_path):
 
             # Check whether file is in text format or not.
             if file.endswith(".txt"):
                 file_path = f"{raw_data_label_path}\{file}"
 
-                # read_labels(file_path, raw_data_classes)
                 modify_labels(file_path, raw_data_classes)
 
     except FileNotFoundError:
         return
 
+def main():
+    # List all datasets directory
+    # Iterate through all datasets
+    for dataset_name in os.listdir(path["/datasets"]):
+
+        # Get current dataset path
+        target_dataset_path = os.path.join(path["/datasets"], dataset_name)
+        
+        # Get unprepared data.yaml path.
+        target_dataset_data_yaml = os.path.join(target_dataset_path,"data.yaml")
+
+        for folder_name in ["train", "valid", "test", "export"]:
+            try:
+                # Path should be ../datasets/<dataset_name>/<sub-dataset-dir>/train/labels/...
+                labels_path = os.path.join(target_dataset_path,folder_name,"labels")
+
+                class_label_data_preparation(labels_path, target_dataset_data_yaml)
+
+            except(FileNotFoundError):
+                continue
+
 if __name__ == "__main__":
-    # Path should be ../Datasets-data-preparation/datasets/
-    targeted_dataset_path = os.path.join(DATASETS_PATH)
-
-    sub_dataset_dir_path = os.path.join(targeted_dataset_path, "selected", "traffic-dataset-2")
-
-    # Get unprepared data.yaml path.
-    sub_dataset_yaml_path = os.path.join(sub_dataset_dir_path,"data.yaml")
-
-    for folder_name in ["train", "valid", "test", "export"]:
-        try:
-            # Path should be ../datasets/<dataset_name>/<sub-dataset-dir/train/labels/...
-            label_path = os.path.join(sub_dataset_dir_path,folder_name,"labels")
-
-            class_label_data_preparation(label_path, sub_dataset_yaml_path)
-
-        except(FileNotFoundError):
-            continue
+    main()
 #//----------------------------------------------------------------------------------------------
