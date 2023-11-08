@@ -90,7 +90,8 @@ def create_partition_folder():
 
 
 def main():
-    partition_images()
+    # partition_images()
+    partition_labels()
     # create_partition_folder()
 
 if __name__ == "__main__":

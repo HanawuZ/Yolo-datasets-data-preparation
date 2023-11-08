@@ -18,7 +18,7 @@ Class label indexes
     traffic light(red) : 9
     traffic light(yellow) : 10
     traffic light(green) : 11
-    cyclist : 12
+    # cyclist : 12
 """
 
 # Define list of data classes

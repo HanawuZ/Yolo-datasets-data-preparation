@@ -52,8 +52,7 @@ categories = {'car': 0,
               'traffic light(red)': 9,
               'traffic light(yellow)': 10,
               'traffic light(green)': 11,
-              'cyclist': 12,
-              'traffic light':13,
+              'traffic light':12,
               }
 
 image_name_prefixes = ("0","1","2","3","4","5","6","7","8","9","a","b","f")
