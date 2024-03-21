@@ -1,6 +1,23 @@
-train: ../train/images
-val: ../valid/images
+names: ['car', 'bus', 'person', 'bike', 'truck', 'motorcycle', 'train', 'bicyclist', 'motorcyclist', 'traffic sign', 
+        'traffic light(red)', 'traffic light(yellow)', 'traffic light(green)', 'traffic light', 'deer', 'horse', 'cattle', 'dog', 'elephant']
 
-nc: 13
-names: ['car', 'bus', 'person', 'bike', 'truck', 'motorcycle', 'train', 'rider', 'traffic sign', 
-        'traffic light(red)', 'traffic light(yellow)', 'traffic light(green)', 'cyclist', 'traffic light' ]
+# 0: car
+# 1: bus
+# 2: person
+# 3: bike
+# 4: truck
+# 5: motorcycle
+# 6: train
+# 7: bicyclist
+# 8: motorcyclist
+# 9: traffic sign
+# 10: traffic light(red)
+# 11: traffic light(yellow)
+# 12: traffic light(green)
+# 13: traffic light
+# 14: deer
+# 15: horse
+# 16: cattle
+# 17: dog
+# 18: elephant
+# 19: bear

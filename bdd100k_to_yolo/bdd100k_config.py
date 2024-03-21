@@ -47,12 +47,13 @@ categories = {'car': 0,
               'truck': 4,
               'motor': 5,
               'train': 6,
-              'rider': 7,
-              'traffic sign': 8,
-              'traffic light(red)': 9,
-              'traffic light(yellow)': 10,
-              'traffic light(green)': 11,
-              'traffic light':12,
+              'bicyclist': 7,
+              'motorcyclist': 8,
+              'traffic sign': 9,
+              'traffic light(red)': 10,
+              'traffic light(yellow)': 11,
+              'traffic light(green)': 12,
+              'traffic light':13,
               }
 
 image_name_prefixes = ("0","1","2","3","4","5","6","7","8","9","a","b","f")
@@ -64,7 +65,7 @@ PATHS = {
     "/bdd100k/train" : BDD100K_TRAIN_DIR,
     "/bdd100k/train/images" : BDD100K_TRAIN_IMAGES_DIR,
     "/bdd100k/train/labels" : BDD100K_TRAIN_LABELS_DIR,
-    "/bdd100k/valid/labels/bdd100k_labels_images_train.json" : BDD100K_TRAIN_LABELS_JSON,
+    "/bdd100k/train/labels/bdd100k_labels_images_train.json" : BDD100K_TRAIN_LABELS_JSON,
     
     "/bdd100k/valid" : BDD100K_VALID_DIR,
     "/bdd100k/valid/images" : BDD100K_VALID_IMAGES_DIR,

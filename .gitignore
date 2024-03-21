@@ -6,3 +6,5 @@ preprocessed_bdd100k
 
 # Ignore pycache folder
 __pycache__
+
+/temp/
