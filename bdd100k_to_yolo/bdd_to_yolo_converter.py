@@ -141,7 +141,19 @@ def generate_yolo_labels(json_path, save_path, fname_prefix=None, fname_postfix=
                         traffic_light_color = attributes["trafficLightColor"] if attributes["trafficLightColor"] in ["red", "yellow", "green"] else None
                         
                         class_id = categories[f"{class_name}({traffic_light_color})"] if traffic_light_color is not None else categories[class_name] 
-                            
+                    
+                    elif class_name == "car":
+                        # Get traffic light attributes
+                        attributes = label["attributes"]
+                        
+                        if attributes["occluded"] == True and attributes["truncated"] == True:
+                            class_id = categories["occluded-truncated car"]
+                        elif attributes["occluded"] == True:
+                            class_id = categories["occluded car"]
+                        elif attributes["truncated"] == True:
+                            class_id = categories["truncated car"]
+                        else:
+                            class_id = categories[class_name]
                     else :
                         class_id = categories[class_name]
 
@@ -205,8 +217,8 @@ def main():
     print('start YOLO labels creation')
 
     # Start converting bdd100k labels format into YOLO format
-    generate_yolo_labels(json_path = PATHS["/bdd100k/train/labels/bdd100k_labels_images_train.json"], 
-                         save_path = PATHS["/preprocessed_bdd100k/train/labels"],
+    generate_yolo_labels(json_path = PATHS["/bdd100k/valid/labels/bdd100k_labels_images_val.json"], 
+                         save_path = PATHS["/preprocessed_bdd100k/valid/labels"],
                          fname_prefix=None, fname_postfix=None)
 
 if __name__ == '__main__':

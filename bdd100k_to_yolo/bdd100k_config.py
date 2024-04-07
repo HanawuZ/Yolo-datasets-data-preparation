@@ -38,22 +38,30 @@ PREPROCESSED_BDD100K_TRAIN_LABELS_DIR = os.path.join(PREPROCESSED_BDD100K_TRAIN_
 # BDD100K_VAL_LABEL_SAVE_PATH = os.path.join(SAVE_PATH,"val","labels")
 # BDD100K_VAL_TRAIN_SAVE_PATH = os.path.join(SAVE_PATH,"train","labels")
 
+"""
+# 1: occluded car 
+# 2: truncated car
+# 3: occluded-truncated car
 
+"""
 img_size = (1280, 720)
 categories = {'car': 0,
-              'bus': 1,
-              'person': 2,
-              'bike': 3,
-              'truck': 4,
-              'motor': 5,
-              'train': 6,
-              'bicyclist': 7,
-              'motorcyclist': 8,
-              'traffic sign': 9,
-              'traffic light(red)': 10,
-              'traffic light(yellow)': 11,
-              'traffic light(green)': 12,
-              'traffic light':13,
+              'occluded car': 1,
+              'truncated car':2,
+              'occluded-truncated car':3,
+              'bus': 4,
+              'person': 5,
+              'bike': 6,
+              'truck': 7,
+              'motor': 8,
+              'train': 9,
+              'bicyclist': 10,
+              'motorcyclist': 11,
+              'traffic sign': 12,
+              'traffic light(red)': 13,
+              'traffic light(yellow)': 14,
+              'traffic light(green)': 15,
+              'traffic light':16,
               }
 
 image_name_prefixes = ("0","1","2","3","4","5","6","7","8","9","a","b","f")

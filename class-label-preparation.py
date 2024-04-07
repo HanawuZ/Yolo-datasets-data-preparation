@@ -1,4 +1,3 @@
-# Import Module
 import os
 import yaml
 from path import path
@@ -95,15 +94,19 @@ def modify_labels(label_txt_file, raw_classes):
         # Get target class index as integer. Ex. cls_i = 0 and get value from raw_classes with key cls_i
         cls_i = int(split_label[0])
         cls = raw_classes[cls_i]
-    
         # Iterate through data labels list : ['bus', 'car', 'motorcycle', 'truck']
         for i in range(len(data_classes)):
             if cls in ['cow', 'buffalo', 'gaur']:
-                split_label[0] = "16"
+                split_label[0] = "19"
                 prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
                 break
 
             elif cls in ['dog', 'wolf']:
+                split_label[0] = "20"
+                prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
+                break
+            
+            elif cls in ['buck','doe','deer']:
                 split_label[0] = "17"
                 prepared_label_list.append(f'{split_label[0]} {split_label[1]} {split_label[2]} {split_label[3]} {split_label[4]}')
                 break

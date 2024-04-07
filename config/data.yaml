@@ -1,23 +1,27 @@
-names: ['car', 'bus', 'person', 'bike', 'truck', 'motorcycle', 'train', 'bicyclist', 'motorcyclist', 'traffic sign', 
-        'traffic light(red)', 'traffic light(yellow)', 'traffic light(green)', 'traffic light', 'deer', 'horse', 'cattle', 'dog', 'elephant']
+names: ['car', 'occluded car', 'truncated car', 'occluded-truncated car', 'bus', 'person', 'bike', 'truck', 'motorcycle', 'train', 'bicyclist', 'motorcyclist', 'traffic sign', 
+        'traffic light(red)', 'traffic light(yellow)', 'traffic light(green)', 'traffic light', 'deer', 'horse', 'cattle', 'dog', 'elephant', 'cat']
+
 
 # 0: car
-# 1: bus
-# 2: person
-# 3: bike
-# 4: truck
-# 5: motorcycle
-# 6: train
-# 7: bicyclist
-# 8: motorcyclist
-# 9: traffic sign
-# 10: traffic light(red)
-# 11: traffic light(yellow)
-# 12: traffic light(green)
-# 13: traffic light
-# 14: deer
-# 15: horse
-# 16: cattle
-# 17: dog
-# 18: elephant
-# 19: bear
+# 1: occluded car 
+# 2: truncated car
+# 3: occluded-truncated car
+# 4: bus
+# 5: person
+# 6: bike
+# 7: truck
+# 8: motorcycle
+# 9: train
+# 10: bicyclist
+# 11: motorcyclist
+# 12: traffic sign
+# 13: traffic light(red)
+# 14: traffic light(yellow)
+# 15: traffic light(green)
+# 16: traffic light
+# 17: deer
+# 18: horse
+# 19: cattle
+# 20: dog
+# 21: elephant
+# 22: cat
