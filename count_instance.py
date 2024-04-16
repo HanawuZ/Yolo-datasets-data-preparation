@@ -32,6 +32,8 @@ def count_instances(class_index, labels_path):
 def main():
     # List all datasets directory
     # Iterate through all datasets
+
+
     for dataset_name in os.listdir(path["/datasets"]):
 
         # Get current dataset path
@@ -42,7 +44,7 @@ def main():
             
             # Path should be ../datasets/<dataset_name>/<sub-dataset-dir>/train/labels/...
             labels_path = os.path.join(target_dataset_path,folder_name,"labels")
-            count_instances(15, labels_path)
+            count_instances(22, labels_path)
 
 if __name__ == "__main__":
     main()

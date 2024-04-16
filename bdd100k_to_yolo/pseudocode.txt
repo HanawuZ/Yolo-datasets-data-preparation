@@ -1,0 +1,239 @@
+Determine data of object categories with category as key and category index as value (As variable categories)
+Define image width and image height (imgWidth = 1280, imgHeight = 720)
+Input: 
+    jsonPath: A path of BDD100k json file
+    savePath: A destination path for text file to being save
+
+Function convertBDD100kToYolo(jsonPath, savePath) do
+    jsonData = Load json file by parsing jsonPath
+    For each imgAnnotationData in jsonData do
+        imgName = Get image name excluding .txt (imgAnnotationData["name"][:-4])
+        annotationFileName = `{imgName}.txt` (Define annotation text file using imgName)
+        annotationFilePath = Join savePath with annotationFileName to get path of annotation text file 
+        objectAnnotationData = Get object bounding box annotation from current element (imgAnnotationData["label"])
+        
+        For each objectData in objectAnnotationData do
+            categoryName = Get object's category (objectData["category"])
+            categoryId = Using categoryName to get category index (categories[categoryName])
+            x1 = Get object's x1 coordinate (objectData["box2d"]["x1"])
+            y1 = Get object's y1 coordinate (objectData["box2d"]["y1"])
+            x2 = Get object's x2 coordinate (objectData["box2d"]["x2"])
+            y2 = Get object's y2 coordinate (objectData["box2d"]["y2"])
+
+            Get centroid coordinate of bounding box
+            centroidX = (x1 + x2)/2
+            centroidY = (y1 + y2)/2
+            
+            Get width and height object's bounding box
+            bboxWidth, bboxHeight = x2 - x1, y2 - y1
+
+            Normalize bounding box's centroid and bounding width and height
+            normalizedCentroidX, normalizedCentroidY = centroidX/imgWidth, centroidY/imgHeight
+            normalizedWidth, normalizeHeight = bboxWidth/imgWidth, bboxHeight/imgHeight
+
+            Define text to store categoryId and normalized values
+            annotationText = `{categoryId} {normalizedCentroidX} {normalizedCentroidY} {normalizedWidth} {normalizeHeight}\n`
+            Open text file using textFilePath as path name and write annotationText to text file
+            Close text file
+        End for 
+    End for
+End function
+
+
+------------------------------------------------------------------------------------------
+Determine data of object categories with category as key and category index as value (As variable categories)
+Define image width and image height (imgWidth = 1280, imgHeight = 720)
+
+Input: 
+    textFilePath: A destination path for text file to being save
+    objectAnnotationData: An array of bounding box annotation data
+
+Function createCategoryForTwoWheelers(textFilePath, objectAnnotationData) do
+    riderObjectsData = Get rider bounding box annotation from objectAnnotationData, will got array of object data
+    twoWheelersData = Get bike and motorcycle bounding box annotation from objectAnnotationData, will got array of object data
+
+    For each twoWheeler in twoWheelersData then
+        categoryName = Get object's category (twoWheeler["category"])
+        twoWheelerX1 = Get object's x1 coordinate (twoWheeler["box2d"]["x1"])
+        twoWheelerY1 = Get object's y1 coordinate (twoWheeler["box2d"]["y1"])
+        twoWheelerX2 = Get object's x2 coordinate (twoWheeler["box2d"]["x2"])
+        twoWheelerY2 = Get object's y2 coordinate (twoWheeler["box2d"]["y2"])
+        twoWheelerBBox = [twoWheelerX1, twoWheelerY1, twoWheelerX2, twoWheelerY2]
+
+        matchRiders = Define map data for rider bounding box overlap with twoWheeler bounding box (key is index and value is riderObject)
+
+        If length of riderObjectsData > 0 then
+            For index, each riderObject in riderObjectsData then
+                riderX1 = Get object's x1 coordinate (riderObject["box2d"]["x1"])
+                riderY1 = Get object's y1 coordinate (riderObject["box2d"]["y1"])
+                riderX2 = Get object's x2 coordinate (riderObject["box2d"]["x2"])
+                riderY2 = Get object's y2 coordinate (riderObject["box2d"]["y2"])
+                riderBBox = [riderX1, riderY1, riderX2, riderY2]
+                iou = Calculate intersection over union (IoU) between twoWheelerBBox and riderBBox 
+                if iou > 0.1 then
+                    matchRiders[index] = riderObject
+                End if
+            End for
+        End If
+
+        If length of matchRiders > 0 then
+            categoryId = Determine category ID based on category name
+
+            Extract bounding box coordinates of matched riders
+            x1s = Extract x1 coordinates from all matched riders and add with twoWheelerX1
+            y1s = Extract y1 coordinates from all matched riders and add with twoWheelerY1
+            x2s = Extract x2 coordinates from all matched riders and add with twoWheelerX2
+            y1s = Extract y2 coordinates from all matched riders and add with twoWheelerY2
+
+            lowestX1, lowestY1 = Find lowest x1 from x1s, Find lowest y1 from y1s
+            highestX1, highestY2 = Find highest x2 from x2s, Find highest y2 from y2s
+
+            Get centroid coordinate of bounding box
+            centroidX = (lowestX1 + highestX1)/2
+            centroidY = (lowestY1 + highestY2)/2
+            
+            Get width and height object's bounding box
+            bboxWidth, bboxHeight = x2 - x1, y2 - y1
+
+            Normalize bounding box's centroid and bounding width and height
+            normalizedCentroidX, normalizedCentroidY = centroidX/imgWidth, centroidY/imgHeight
+            normalizedWidth, normalizeHeight = bboxWidth/imgWidth, bboxHeight/imgHeight
+
+            Define text to store categoryId and normalized values
+            annotationText = `{categoryId} {normalizedCentroidX} {normalizedCentroidY} {normalizedWidth} {normalizeHeight}\n`
+            Open text file using textFilePath as path name and write annotationText to text file
+            Close text file
+        End if
+
+        For each matchRider in matchRiders then
+            Remove match rider from array riderObjectsData
+        End for 
+    End for
+End
+
+
+------------------------------------------------------------------------------------------    
+def create_two_wheeler_category(file_to_write,object_labels):
+    rider_labels = [label for label in object_labels if label['category'] == "rider"]
+    small_vehicle_labels = [label for label in object_labels if label['category'] in ["bike", "motor"]]
+                
+    for small_vehicle in small_vehicle_labels:
+        class_name = small_vehicle['category']
+        small_vehicle_X1 = small_vehicle['box2d']['x1']
+        small_vehicle_Y1 = small_vehicle['box2d']['y1']
+        small_vehicle_X2 = small_vehicle['box2d']['x2']
+        small_vehicle_Y2 = small_vehicle['box2d']['y2']
+        small_vehicle_bbox = [small_vehicle['box2d'][key] for key in ['x1', 'y1', 'x2', 'y2']]
+        match_rider_labels = {}
+
+        if len(rider_labels) > 0:
+            for i, rider_label in enumerate(rider_labels):
+                rider_bbox = [rider_label['box2d'][key] for key in ['x1', 'y1', 'x2', 'y2']]
+                iou = calculate_iou(rider_bbox, small_vehicle_bbox)
+                if iou > 0.1:
+                    match_rider_labels[i] = rider_label
+                    # match_rider_labels.append((i, rider_label))
+
+        if len(match_rider_labels) > 0:
+            class_id = categories['bicyclist'] if class_name == 'bike' else categories['motorcyclist']
+            
+            x1s = [rider['box2d']['x1'] for rider in list(match_rider_labels.values())]
+            y1s = [rider['box2d']['y1'] for rider in list(match_rider_labels.values())]
+            x2s = [rider['box2d']['x2'] for rider in list(match_rider_labels.values())]
+            y2s = [rider['box2d']['y2'] for rider in list(match_rider_labels.values())]
+
+            x1s = x1s + [small_vehicle_X1]
+            y1s = y1s + [small_vehicle_Y1]
+            x2s = x2s + [small_vehicle_X2]
+            y2s = y2s + [small_vehicle_Y2]
+            
+            lowest_x1, lowest_y1 = min(x1s), min(y1s)
+            highest_x2, highest_y2 = max(x2s), max(y2s)
+                        
+            bbox_x = (lowest_x1 + highest_x2)/2
+            bbox_y = (lowest_y1 + highest_y2)/2
+
+            bbox_width = highest_x2-lowest_x1
+            bbox_height = highest_y2-lowest_y1
+
+            bbox_x_norm = bbox_x / img_w
+            bbox_y_norm = bbox_y / img_h
+
+            bbox_width_norm = bbox_width / img_w
+            bbox_height_norm = bbox_height / img_h
+
+            line_to_write = '{} {} {} {} {}'.format(class_id, bbox_x_norm, bbox_y_norm, bbox_width_norm, bbox_height_norm)
+            file_to_write.write(line_to_write + "\n")
+        
+
+        for match_rider in list(match_rider_labels.values()):
+            rider_labels.remove(match_rider)
+
+def generate_yolo_labels(json_path, save_path, fname_prefix=None, fname_postfix=None):
+    ignore_categories = ["drivable area", "lane"]
+
+    with open(json_path) as json_file:
+        data = json.load(json_file)
+
+        for img in tqdm(data):
+            img_name = str(img['name'][:-4])
+            img_label_txt = (fname_prefix if fname_prefix is not None else '') + img_name
+            img_label_txt += (fname_postfix if fname_postfix is not None else '') + ".txt"
+            img_labels = [l for l in img['labels'] if l['category'] not in ignore_categories]
+            
+            file_path = os.path.join(save_path,img_label_txt)
+            
+            with open(file_path, 'w+') as f_label:
+                
+                create_two_wheeler_category(f_label, img_labels)
+                for label in img_labels:
+                    if label['category'] == 'rider':    
+                        continue
+                    
+                    class_name = label['category']
+                    y1 = label['box2d']['y1']
+                    x2 = label['box2d']['x2']
+                    x1 = label['box2d']['x1']
+                    y2 = label['box2d']['y2']
+                    
+                    # If class name is traffic light, then need to specify what color a traffic light is
+                    if class_name == "traffic light":
+
+                        # Get traffic light attributes
+                        attributes = label["attributes"]
+
+                        # Get color of traffic light
+                        traffic_light_color = attributes["trafficLightColor"] if attributes["trafficLightColor"] in ["red", "yellow", "green"] else None
+                        
+                        class_id = categories[f"{class_name}({traffic_light_color})"] if traffic_light_color is not None else categories[class_name] 
+                    
+                    elif class_name == "car":
+                        # Get traffic light attributes
+                        attributes = label["attributes"]
+                        
+                        if attributes["occluded"] == True and attributes["truncated"] == True:
+                            class_id = categories["occluded-truncated car"]
+                        elif attributes["occluded"] == True:
+                            class_id = categories["occluded car"]
+                        elif attributes["truncated"] == True:
+                            class_id = categories["truncated car"]
+                        else:
+                            class_id = categories[class_name]
+                    else :
+                        class_id = categories[class_name]
+
+                    bbox_x = (x1 + x2)/2
+                    bbox_y = (y1 + y2)/2
+
+                    bbox_width = x2-x1
+                    bbox_height = y2-y1
+
+                    bbox_x_norm = bbox_x / img_w
+                    bbox_y_norm = bbox_y / img_h
+
+                    bbox_width_norm = bbox_width / img_w
+                    bbox_height_norm = bbox_height / img_h
+
+                    line_to_write = '{} {} {} {} {}'.format(
+                        class_id, bbox_x_norm, bbox_y_norm, bbox_width_norm, bbox_height_norm)
+                    f_label.write(line_to_write + "\n")

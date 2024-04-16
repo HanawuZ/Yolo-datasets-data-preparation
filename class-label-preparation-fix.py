@@ -34,7 +34,7 @@ def modify_labels(file):
         split_label = label.split(" ")
 
         # Get target class index as integer. Ex. cls_i = 0
-        cls_i = 21
+        cls_i = 22
         
         # Iterate through data labels list : ['bus', 'car', 'motorcycle', 'truck']
             

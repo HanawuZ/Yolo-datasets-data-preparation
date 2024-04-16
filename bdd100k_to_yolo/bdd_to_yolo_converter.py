@@ -2,7 +2,7 @@ import json
 import os
 from tqdm import tqdm
 from bdd100k_config import PATHS, categories, img_size
-
+img_w, img_h = img_size
 
 def calculate_iou(actual_bbox, predicted_bbox):
     # Extract coordinates
@@ -36,8 +36,64 @@ def calculate_iou(actual_bbox, predicted_bbox):
 
     return iou
 
+
+def create_two_wheeler_category(file_to_write,object_labels):
+    rider_labels = [label for label in object_labels if label['category'] == "rider"]
+    small_vehicle_labels = [label for label in object_labels if label['category'] in ["bike", "motor"]]
+                
+    for small_vehicle in small_vehicle_labels:
+        class_name = small_vehicle['category']
+        small_vehicle_X1 = small_vehicle['box2d']['x1']
+        small_vehicle_Y1 = small_vehicle['box2d']['y1']
+        small_vehicle_X2 = small_vehicle['box2d']['x2']
+        small_vehicle_Y2 = small_vehicle['box2d']['y2']
+        small_vehicle_bbox = [small_vehicle['box2d'][key] for key in ['x1', 'y1', 'x2', 'y2']]
+        match_rider_labels = {}
+
+        if len(rider_labels) > 0:
+            for i, rider_label in enumerate(rider_labels):
+                rider_bbox = [rider_label['box2d'][key] for key in ['x1', 'y1', 'x2', 'y2']]
+                iou = calculate_iou(rider_bbox, small_vehicle_bbox)
+                if iou > 0.1:
+                    match_rider_labels[i] = rider_label
+                    # match_rider_labels.append((i, rider_label))
+
+        if len(match_rider_labels) > 0:
+            class_id = categories['bicyclist'] if class_name == 'bike' else categories['motorcyclist']
+            
+            x1s = [rider['box2d']['x1'] for rider in list(match_rider_labels.values())]
+            y1s = [rider['box2d']['y1'] for rider in list(match_rider_labels.values())]
+            x2s = [rider['box2d']['x2'] for rider in list(match_rider_labels.values())]
+            y2s = [rider['box2d']['y2'] for rider in list(match_rider_labels.values())]
+
+            x1s = x1s + [small_vehicle_X1]
+            y1s = y1s + [small_vehicle_Y1]
+            x2s = x2s + [small_vehicle_X2]
+            y2s = y2s + [small_vehicle_Y2]
+            
+            lowest_x1, lowest_y1 = min(x1s), min(y1s)
+            highest_x2, highest_y2 = max(x2s), max(y2s)
+                        
+            bbox_x = (lowest_x1 + highest_x2)/2
+            bbox_y = (lowest_y1 + highest_y2)/2
+
+            bbox_width = highest_x2-lowest_x1
+            bbox_height = highest_y2-lowest_y1
+
+            bbox_x_norm = bbox_x / img_w
+            bbox_y_norm = bbox_y / img_h
+
+            bbox_width_norm = bbox_width / img_w
+            bbox_height_norm = bbox_height / img_h
+
+            line_to_write = '{} {} {} {} {}'.format(class_id, bbox_x_norm, bbox_y_norm, bbox_width_norm, bbox_height_norm)
+            file_to_write.write(line_to_write + "\n")
+        
+
+        for match_rider in list(match_rider_labels.values()):
+            rider_labels.remove(match_rider)
+
 def generate_yolo_labels(json_path, save_path, fname_prefix=None, fname_postfix=None):
-    img_w, img_h = img_size
     ignore_categories = ["drivable area", "lane"]
 
     with open(json_path) as json_file:
@@ -53,74 +109,7 @@ def generate_yolo_labels(json_path, save_path, fname_prefix=None, fname_postfix=
             
             with open(file_path, 'w+') as f_label:
                 
-                rider_labels = [label for label in img_labels if label['category'] == "rider"]
-                bike_labels = [label for label in img_labels if label['category'] == "bike"]
-                motor_labels = [label for label in img_labels if label['category'] == "motor"]
-
-                # Merge list bike_labels and motor_lables
-                small_vehicle_labels = bike_labels + motor_labels
-                
-                for small_vehicle in small_vehicle_labels:
-                    class_name = small_vehicle['category']
-                    small_vehicle_X1 = small_vehicle['box2d']['x1']
-                    small_vehicle_Y1 = small_vehicle['box2d']['y1']
-                    small_vehicle_X2 = small_vehicle['box2d']['x2']
-                    small_vehicle_Y2 = small_vehicle['box2d']['y2']
-                    small_vehicle_bbox = [small_vehicle_X1, small_vehicle_Y1, small_vehicle_X2, small_vehicle_Y2]
-                    
-                    match_rider_labels = []
-                    if len(rider_labels) > 0:
-                        for i in range(0, len(rider_labels)):
-                            rider_y1 = rider_labels[i]['box2d']['y1']
-                            rider_x2 = rider_labels[i]['box2d']['x2']
-                            rider_x1 = rider_labels[i]['box2d']['x1']
-                            rider_y2 = rider_labels[i]['box2d']['y2']
-                            rider_bbox = [rider_x1, rider_y1, rider_x2, rider_y2]
-                            
-                            iou = calculate_iou(rider_bbox, small_vehicle_bbox)
-                            # Append rider object that intersect with small vehicle
-                            if iou > 0.1:
-                                match_rider_labels.append({i:rider_labels[i]}) 
-
-
-                    if len(match_rider_labels) > 0:
-                        if class_name == 'bike':
-                            class_id = categories['bicyclist']
-                        elif class_name == 'motor':
-                            class_id = categories['motorcyclist']
-                                    
-                        x1s = [list(rider.values())[0]['box2d']['x1'] for rider in match_rider_labels]
-                        y1s = [list(rider.values())[0]['box2d']['y1'] for rider in match_rider_labels]
-                        x2s = [list(rider.values())[0]['box2d']['x2'] for rider in match_rider_labels]
-                        y2s = [list(rider.values())[0]['box2d']['y2'] for rider in match_rider_labels]
-                        
-                        x1s = x1s + [small_vehicle_X1]
-                        y1s = y1s + [small_vehicle_Y1]
-                        x2s = x2s + [small_vehicle_X2]
-                        y2s = y2s + [small_vehicle_Y2]
-                        
-                        lowest_x1, lowest_y1 = min(x1s), min(y1s)
-                        highest_x2, highest_y2 = max(x2s), max(y2s)
-                        
-                        bbox_x = (lowest_x1 + highest_x2)/2
-                        bbox_y = (lowest_y1 + highest_y2)/2
-
-                        bbox_width = highest_x2-lowest_x1
-                        bbox_height = highest_y2-lowest_y1
-
-                        bbox_x_norm = bbox_x / img_w
-                        bbox_y_norm = bbox_y / img_h
-
-                        bbox_width_norm = bbox_width / img_w
-                        bbox_height_norm = bbox_height / img_h
-
-                        line_to_write = '{} {} {} {} {}'.format(
-                            class_id, bbox_x_norm, bbox_y_norm, bbox_width_norm, bbox_height_norm)
-                        f_label.write(line_to_write + "\n")
-                        
-                    for match_rider_label in match_rider_labels:
-                        rider_labels.remove(list(match_rider_label.values())[0])
-                        
+                create_two_wheeler_category(f_label, img_labels)
                 for label in img_labels:
                     if label['category'] == 'rider':    
                         continue
